@@ -14,13 +14,10 @@ def ask_question():
     question = data['question']
     results = search_text(question)
     
-    logging.debug(f"Search results: {results}")
-    
     if not results:
         return jsonify({"answer": "No relevant sections found in the document."}), 404
     
     context = " ".join([hit['text'] for hit in results])
-    logging.debug(f"Context: {context}")
     
     answer = generate_answer(question, context, results)
     
