@@ -1,7 +1,10 @@
 from flask import Blueprint, request, jsonify
 from app.services.meilisearch_service import search_text
-from app.services.openai_service import generate_answer
+from app.services.openai_service import generate_answer, optimize_question
 import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 chat_bp = Blueprint('chat_bp', __name__)
 
@@ -12,13 +15,20 @@ def ask_question():
         return jsonify({"error": "Invalid input"}), 400
 
     question = data['question']
-    results = search_text(question)
+    
+    logger.info(f"Original question: {question}")
+    
+    optimized_question = optimize_question(question)
+    
+    logger.info(f"Optimized question: {optimized_question}")
+
+    results = search_text(optimized_question)
     
     if not results:
         return jsonify({"answer": "No relevant sections found in the document."}), 404
     
     context = " ".join([hit['text'] for hit in results])
     
-    answer = generate_answer(question, context, results)
+    answer = generate_answer(optimized_question, context, results)
     
     return jsonify({"answer": answer})
