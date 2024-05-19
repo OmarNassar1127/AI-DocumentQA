@@ -1,6 +1,6 @@
 # DocumentQA
 
-DocumentQA is a Flask-based application that leverages AI to provide answers to questions based on the content of indexed PDF documents. Utilizing OpenAI's GPT-4 model for generating answers and Meilisearch for document indexing and retrieval, this project offers a robust solution for querying document contents efficiently.
+DocumentQA is a Flask-based application that leverages AI to provide answers to questions based on the content of indexed PDF documents. Utilizing OpenAI's GPT-4o model for generating answers and Meilisearch for document indexing and retrieval, this project offers a robust solution for querying document contents efficiently.
 
 ## Features
 
