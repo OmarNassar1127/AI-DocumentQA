@@ -11,7 +11,6 @@ def index_pdf():
     data = request.get_json()
     pdf_filename = data.get('pdf_filename')
     
-    # Construct an absolute path to the PDF file
     pdf_path = os.path.join(os.path.dirname(__file__), '..', '..', 'pdfs', pdf_filename)
     pdf_path = os.path.abspath(pdf_path)
     
