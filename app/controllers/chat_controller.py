@@ -11,10 +11,11 @@ chat_bp = Blueprint('chat_bp', __name__)
 @chat_bp.route('/ask-question', methods=['POST'])
 def ask_question():
     data = request.get_json()
-    if not data or 'question' not in data:
+    if not data or 'question' not in data or 'document_id' not in data:
         return jsonify({"error": "Invalid input"}), 400
 
     question = data['question']
+    document_id = data['document_id']
     
     logger.info(f"Original question: {question}")
     
@@ -22,7 +23,7 @@ def ask_question():
     
     logger.info(f"Optimized question: {optimized_question}")
 
-    results = search_text(optimized_question)
+    results = search_text(optimized_question, document_id)
     
     if not results:
         return jsonify({"answer": "No relevant sections found in the document."}), 404
