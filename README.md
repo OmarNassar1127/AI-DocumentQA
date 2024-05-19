@@ -79,3 +79,6 @@ The project requires the following Python packages:
   {
     "question": "What is Bitcoin?"
   }
+
+  ## License
+  This project is licensed under the MIT License.
