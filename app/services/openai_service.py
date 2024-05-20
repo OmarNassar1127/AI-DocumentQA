@@ -7,7 +7,7 @@ def optimize_question(question):
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant. Please optimize the following question for clarity and specificity."},
+            {"role": "system", "content": "You are a helpful assistant. Optimize the following question for clarity and specificity without changing its original intent."},
             {"role": "user", "content": question}
         ],
         max_tokens=50
@@ -20,7 +20,8 @@ def generate_answer(question, context, hits):
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant. When providing an answer, include the relevant text along with the page number where it was found. Make sure you always put the page number of where you got the answer from."},
+            {"role": "system", "content": "You are a very helpful assistant. When providing an answer, include the relevant text (always quote the specific segment) along with the page number where it was found (this is a must). Make sure you always put the page number of where you got the answer from."},
+            # {"role": "system", "content": "You are a helpful assistant. When providing an answer, include the relevant text along with the page number where it was found. Make sure you always put the page number of where you got the answer from."},
             {"role": "user", "content": f"Question: {question}\nContext: {context}\nSources:\n{formatted_hits}"}
         ],
         max_tokens=250
