@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify
 from app.services.pdf_service import extract_text
-from app.services.meilisearch_service import index_text
+from app.services.meilisearch_service import index_text, delete_all_documents
 import logging
 
 pdf_bp = Blueprint('pdf', __name__)
@@ -24,6 +24,15 @@ def index_pdf():
     pdf_id = pdf_filename.split('.')[0]
     
     for page_number, page_text in enumerate(pdf_text):
-        index_text(page_text, pdf_id, page_number)
+        index_text(page_text, pdf_id, page_number + 1)
     
     return jsonify({"message": "PDF indexed successfully"}), 200
+
+@pdf_bp.route('/delete-documents', methods=['DELETE'])
+def delete_documents():
+    try:
+        response = delete_all_documents()
+        return jsonify({"message": "All documents deleted successfully", "status": response}), 200
+    except Exception as e:
+        logging.error(f"Error deleting documents: {e}")
+        return jsonify({"error": "Failed to delete documents"}), 500
