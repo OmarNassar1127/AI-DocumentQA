@@ -3,7 +3,6 @@ from config.settings import settings
 
 client = meilisearch.Client(settings.MEILISEARCH_URL)
 
-# Create the index and specify the primary key
 try:
     index = client.get_index('pdfs')
     print("Index 'pdfs' already exists. Proceeding with existing index.")
@@ -33,3 +32,7 @@ def search_text(query, document_id):
         'filter': f'pdf_id = "{document_id}"'
     })
     return results['hits']
+
+def delete_all_documents():
+    response = index.delete_all_documents()
+    return response
