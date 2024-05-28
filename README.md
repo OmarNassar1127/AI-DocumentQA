@@ -48,6 +48,9 @@ The project requires the following Python packages:
 7. **Run the Flask Application**:
   flask run
 
+7. **Run the Streamlit Application**:
+streamlit run app.py
+
 
 ## Usage
   - Index a PDF
