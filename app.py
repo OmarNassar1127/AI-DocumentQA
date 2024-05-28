@@ -23,7 +23,7 @@ def chat_with_ai(prompt, document_id):
     return response.json().get('answer', 'Error: No response from server')
 
 # Streamlit app setup
-st.title('AI Chatbot with Document Context')
+st.title('AI - talk to your documents')
 
 # Fetch and display available documents
 document_list = fetch_documents()
