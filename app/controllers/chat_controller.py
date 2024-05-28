@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.meilisearch_service import search_text
+from app.services.meilisearch_service import search_text, get_documents  
 from app.services.openai_service import generate_answer, optimize_question
 import logging
 
@@ -33,3 +33,11 @@ def ask_question():
     answer = generate_answer(optimized_question, context, results)
     
     return jsonify({"answer": answer})
+
+@chat_bp.route('/get-documents', methods=['GET'])
+def get_docs():
+    try:
+        documents = get_documents()
+        return jsonify(documents)
+    except Exception as e:
+        return jsonify({"error": "Failed to retrieve documents"}), 500

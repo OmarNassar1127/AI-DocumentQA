@@ -39,7 +39,7 @@ The project requires the following Python packages:
 
 5. **Run Meilisearch**:
   - **Download and Install Meilisearch**: https://www.meilisearch.com/docs/learn/what_is_meilisearch/sdks
-  - **Start Meilisearch:**: curl -L https://install.meilisearch.com | sh./meilisearch
+  - **Start Meilisearch:**: curl -L https://install.meilisearch.com | sh./meilisearch || curl -L https://install.meilisearch.com | sh and ./meilisearch
   - **PDF Text Extraction**: Utilizes PyMuPDF for extracting text from PDF files.
 
 6. **Run the Setup Script for Meilisearch**:
