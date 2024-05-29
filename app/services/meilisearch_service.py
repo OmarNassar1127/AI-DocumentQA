@@ -36,3 +36,9 @@ def search_text(query, document_id):
 def delete_all_documents():
     response = index.delete_all_documents()
     return response
+
+def get_documents():
+    search_result = index.search("", {'limit': 1000})
+    stored_documents = search_result['hits']
+    document_ids = list(set([doc['pdf_id'] for doc in stored_documents]))
+    return document_ids

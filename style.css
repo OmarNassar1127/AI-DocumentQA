@@ -1,0 +1,26 @@
+.user-message {
+  background-color: #747f96;
+  /* background-color: #747f96; */
+  border-radius: 15px;
+  padding: 10px;
+  margin: 10px;
+  max-width: 60%;
+  align-self: flex-end;
+  /* color: #000000; */
+}
+
+.assistant-message {
+  background-color: #282e37;
+  border-radius: 15px;
+  padding: 10px;
+  margin: 10px;
+  max-width: 60%;
+  align-self: flex-start;
+  border: 1px solid #ccc;
+  /* color: #000000; */
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+}
