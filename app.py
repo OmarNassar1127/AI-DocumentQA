@@ -142,9 +142,9 @@ if 'logged_in' in st.session_state and st.session_state.logged_in:
         # Display chat messages
         st.write('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state.messages:
-            if 'content' in message:
-                if message['role'] == 'user':
-                    st.write(f'<div class="user-message"><b>User:</br> {message["content"]}</div>', unsafe_allow_html=True)
-                else:
-                    st.write(f'<div class="assistant-message"><b>AI:</br> {message["content"]}</div>', unsafe_allow_html=True)
+            if 'question' in message:
+                st.write(f'<div class="user-message"><b>User:</br> {message["question"]}</div>', unsafe_allow_html=True)
+                st.write(f'<div class="user-message"><b>Optimized:</br> {message["optimized_question"]}</div>', unsafe_allow_html=True)
+            if 'answer' in message:
+                st.write(f'<div class="assistant-message"><b>AI:</br> {message["answer"]}</div>', unsafe_allow_html=True)
         st.write('</div>', unsafe_allow_html=True)
