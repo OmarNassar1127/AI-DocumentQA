@@ -5,3 +5,4 @@ pdfminer.six
 meilisearch
 pymysql
 bcrypt
+Flask-Session
