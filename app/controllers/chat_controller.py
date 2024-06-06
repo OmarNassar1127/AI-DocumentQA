@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from app.services.meilisearch_service import search_text, get_documents
 from app.services.openai_service import generate_answer, optimize_question
-from app.controllers.db_operations import save_message, register_user, authenticate_user
+from app.controllers.db_operations import save_message, register_user, authenticate_user, create_chat, get_chats, get_messages
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -38,17 +38,57 @@ def login():
     else:
         return jsonify({"error": "Invalid username or password"}), 401
 
+@chat_bp.route('/create-chat', methods=['POST'])
+def create_new_chat():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    title = data.get('title')
+    if not title:
+        return jsonify({"error": "Invalid input"}), 400
+
+    try:
+        create_chat(session['user_id'], title)
+        return jsonify({"message": "Chat created successfully"}), 200
+    except Exception as e:
+        logger.error(f"Error creating chat: {e}")
+        return jsonify({"error": "Failed to create chat"}), 500
+
+@chat_bp.route('/get-chats', methods=['GET'])
+def get_user_chats():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        chats = get_chats(session['user_id'])
+        return jsonify(chats), 200
+    except Exception as e:
+        logger.error(f"Error retrieving chats: {e}")
+        return jsonify({"error": "Failed to retrieve chats"}), 500
+
+@chat_bp.route('/get-messages/<int:chat_id>', methods=['GET'])
+def get_chat_messages(chat_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        messages = get_messages(chat_id)
+        return jsonify(messages), 200
+    except Exception as e:
+        logger.error(f"Error retrieving messages: {e}")
+        return jsonify({"error": "Failed to retrieve messages"}), 500
+
 @chat_bp.route('/ask-question', methods=['POST'])
 def ask_question():
     if 'user_id' not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
     data = request.get_json()
-    if not data or 'question' not in data or 'document_id' not in data:
+    if not data or 'question' not in data or 'document_id' not in data or 'chat_id' not in data:
         return jsonify({"error": "Invalid input"}), 400
 
     question = data['question']
     document_id = data['document_id']
+    chat_id = data['chat_id']
     
     logger.info(f"Original question: {question}")
     
@@ -65,8 +105,7 @@ def ask_question():
     
     answer = generate_answer(optimized_question, context, results)
 
-    save_message(session['user_id'], 'user', question)
-    save_message(session['user_id'], 'assistant', answer)
+    save_message(chat_id, 'user', question, optimized_question, answer)
     
     return jsonify({"answer": answer})
 
