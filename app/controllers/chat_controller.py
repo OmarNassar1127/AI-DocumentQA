@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from app.services.meilisearch_service import search_text, get_documents
 from app.services.openai_service import generate_answer, optimize_question
-from app.controllers.db_operations import save_message, register_user, authenticate_user, create_chat, get_chats, get_messages
+from app.controllers.db_operations import save_message, register_user, authenticate_user, get_chats, create_chat, get_messages
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -33,49 +33,9 @@ def login():
     user_id = authenticate_user(username, password)
     if user_id:
         session['user_id'] = user_id
-        session.permanent = True
         return jsonify({"message": "Login successful"}), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
-
-@chat_bp.route('/create-chat', methods=['POST'])
-def create_new_chat():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    data = request.get_json()
-    title = data.get('title')
-    if not title:
-        return jsonify({"error": "Invalid input"}), 400
-
-    try:
-        create_chat(session['user_id'], title)
-        return jsonify({"message": "Chat created successfully"}), 200
-    except Exception as e:
-        logger.error(f"Error creating chat: {e}")
-        return jsonify({"error": "Failed to create chat"}), 500
-
-@chat_bp.route('/get-chats', methods=['GET'])
-def get_user_chats():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    try:
-        chats = get_chats(session['user_id'])
-        return jsonify(chats), 200
-    except Exception as e:
-        logger.error(f"Error retrieving chats: {e}")
-        return jsonify({"error": "Failed to retrieve chats"}), 500
-
-@chat_bp.route('/get-messages/<int:chat_id>', methods=['GET'])
-def get_chat_messages(chat_id):
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    try:
-        messages = get_messages(chat_id)
-        return jsonify(messages), 200
-    except Exception as e:
-        logger.error(f"Error retrieving messages: {e}")
-        return jsonify({"error": "Failed to retrieve messages"}), 500
 
 @chat_bp.route('/ask-question', methods=['POST'])
 def ask_question():
@@ -105,7 +65,8 @@ def ask_question():
     
     answer = generate_answer(optimized_question, context, results)
 
-    save_message(chat_id, 'user', question, optimized_question, answer)
+    # Save both user question and AI response
+    save_message(session['user_id'], question, optimized_question, answer, chat_id)
     
     return jsonify({"answer": answer})
 
@@ -118,3 +79,40 @@ def get_docs():
     except Exception as e:
         logger.error(f"Error retrieving documents: {e}")
         return jsonify({"error": "Failed to retrieve documents"}), 500
+
+@chat_bp.route('/get-chats', methods=['GET'])
+def get_all_chats():
+    try:
+        chats = get_chats()
+        logger.info(f"Chats retrieved: {chats}")
+        return jsonify(chats if chats else [])
+    except Exception as e:
+        logger.error(f"Error retrieving chats: {e}")
+        return jsonify({"error": "Failed to retrieve chats"}), 500
+
+@chat_bp.route('/create-chat', methods=['POST'])
+def create_new_chat():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    title = data.get('title')
+    if not title:
+        return jsonify({"error": "Chat title is required"}), 400
+
+    try:
+        chat_id = create_chat(session['user_id'], title)
+        return jsonify({"message": "Chat created successfully", "chat_id": chat_id}), 200
+    except Exception as e:
+        logger.error(f"Error creating chat: {e}")
+        return jsonify({"error": "Failed to create chat"}), 500
+
+@chat_bp.route('/get-messages/<int:chat_id>', methods=['GET'])
+def get_chat_messages(chat_id):
+    try:
+        messages = get_messages(chat_id)
+        logger.info(f"Messages retrieved: {messages}")
+        return jsonify(messages if messages else [])
+    except Exception as e:
+        logger.error(f"Error retrieving messages: {e}")
+        return jsonify({"error": "Failed to retrieve messages"}), 500
