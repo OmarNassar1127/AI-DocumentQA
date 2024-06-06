@@ -1,11 +1,11 @@
 .user-message {
   background-color: #747f96;
-  /* background-color: #747f96; */
   border-radius: 15px;
   padding: 10px;
   margin: 10px;
   max-width: 60%;
   align-self: flex-end;
+  color: #ffffff;
   /* color: #000000; */
 }
 
@@ -17,6 +17,7 @@
   max-width: 60%;
   align-self: flex-start;
   border: 1px solid #ccc;
+  color: #ffffff;
   /* color: #000000; */
 }
 

@@ -3,3 +3,5 @@ openai
 PyMuPDF
 pdfminer.six
 meilisearch
+pymysql
+bcrypt
