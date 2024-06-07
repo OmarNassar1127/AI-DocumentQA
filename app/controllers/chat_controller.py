@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, make_response
 from app.services.meilisearch_service import search_text, get_documents
 from app.services.openai_service import generate_answer, optimize_question
 from app.controllers.db_operations import save_message, register_user, authenticate_user, get_chats, create_chat, get_messages
@@ -33,7 +33,9 @@ def login():
     user_id = authenticate_user(username, password)
     if user_id:
         session['user_id'] = user_id
-        return jsonify({"message": "Login successful"}), 200
+        response = make_response(jsonify({"message": "Login successful"}), 200)
+        response.set_cookie('session', session.sid)
+        return response
     else:
         return jsonify({"error": "Invalid username or password"}), 401
 

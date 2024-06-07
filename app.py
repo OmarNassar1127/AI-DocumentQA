@@ -20,7 +20,11 @@ def fetch_documents():
 # Function to interact with the AI backend
 def chat_with_ai(prompt, document_id, chat_id):
     response = requests.post('http://127.0.0.1:5000/ask-question', json={'question': prompt, 'document_id': document_id, 'chat_id': chat_id}, cookies={"session": st.session_state.get("session_cookie")})
-    return response.json().get('answer', 'Error: No response from server')
+    if response.status_code == 200:
+        return response.json().get('answer', 'Error: No response from server')
+    else:
+        st.error("Failed to get response from server")
+        return 'Error: No response from server'
 
 # Function to fetch chats from the backend
 def fetch_chats():
@@ -56,6 +60,8 @@ def login(username, password):
         st.session_state.username = username
         st.session_state.session_cookie = response.cookies.get('session')
         st.success("Logged in successfully")
+        st.experimental_set_query_params(logged_in="true")
+        st.experimental_rerun()
     else:
         st.error("Login failed")
 
@@ -67,11 +73,28 @@ def register(username, password):
     else:
         st.error("User registration failed")
 
+# Function to check login status from URL params
+def check_login_status():
+    params = st.experimental_get_query_params()
+    if params.get("logged_in") == ["true"] and 'logged_in' not in st.session_state:
+        st.session_state.logged_in = True
+
 # Streamlit app setup
 st.title('AI - talk to your documents')
 
+# Initialize session state variables
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+if 'username' not in st.session_state:
+    st.session_state.username = ""
+if 'session_cookie' not in st.session_state:
+    st.session_state.session_cookie = None
+
+# Check login status from URL params
+check_login_status()
+
 # User authentication
-if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+if not st.session_state.logged_in:
     st.sidebar.title("Login / Register")
     option = st.sidebar.selectbox("Choose an option", ["Login", "Register"])
 
@@ -90,9 +113,11 @@ else:
         st.session_state.logged_in = False
         st.session_state.username = ""
         st.session_state.session_cookie = None
+        st.experimental_set_query_params(logged_in=None)
+        st.experimental_rerun()
 
 # Chat management
-if 'logged_in' in st.session_state and st.session_state.logged_in:
+if st.session_state.logged_in:
     st.sidebar.title("Your Chats")
     chats = fetch_chats()
     
@@ -105,6 +130,7 @@ if 'logged_in' in st.session_state and st.session_state.logged_in:
     if st.sidebar.button("Create Chat"):
         if new_chat_title:
             create_chat(new_chat_title)
+            st.experimental_rerun()  # Rerun to refresh chat list
         else:
             st.sidebar.error("Chat title cannot be empty")
 
@@ -130,14 +156,11 @@ if 'logged_in' in st.session_state and st.session_state.logged_in:
         # Button to send the question
         if st.button("Send"):
             if prompt and selected_document:
-                # Display the user prompt
-                st.session_state.messages.append({'role': 'user', 'content': prompt})
-                
                 # Get response from the AI
                 response = chat_with_ai(prompt, selected_document, chat_id)
                 
-                # Display the AI response
-                st.session_state.messages.append({'role': 'assistant', 'content': response})
+                # Display the user prompt and AI response
+                st.session_state.messages.append({'question': prompt, 'optimized_question': prompt, 'answer': response})
 
         # Display chat messages
         st.write('<div class="chat-container">', unsafe_allow_html=True)
