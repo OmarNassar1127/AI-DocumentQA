@@ -39,6 +39,13 @@ def login():
     else:
         return jsonify({"error": "Invalid username or password"}), 401
 
+@chat_bp.route('/logout', methods=['GET'])
+def logout():
+    session.clear()
+    response = make_response(jsonify({"message": "Logout successful"}), 200)
+    response.delete_cookie('session')
+    return response
+
 @chat_bp.route('/ask-question', methods=['POST'])
 def ask_question():
     if 'user_id' not in session:
@@ -84,6 +91,9 @@ def get_docs():
 
 @chat_bp.route('/get-chats', methods=['GET'])
 def get_all_chats():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
     try:
         chats = get_chats()
         logger.info(f"Chats retrieved: {chats}")
@@ -111,6 +121,9 @@ def create_new_chat():
 
 @chat_bp.route('/get-messages/<int:chat_id>', methods=['GET'])
 def get_chat_messages(chat_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
     try:
         messages = get_messages(chat_id)
         logger.info(f"Messages retrieved: {messages}")

@@ -49,6 +49,7 @@ def create_chat(title):
     response = requests.post('http://127.0.0.1:5000/create-chat', json={'title': title}, cookies={"session": st.session_state.get("session_cookie")})
     if response.status_code == 200:
         st.success("Chat created successfully")
+        st.experimental_rerun()
     else:
         st.error("Failed to create chat")
 
@@ -72,6 +73,18 @@ def register(username, password):
         st.success("User registered successfully")
     else:
         st.error("User registration failed")
+
+# Function to handle user logout
+def logout():
+    response = requests.get('http://127.0.0.1:5000/logout', cookies={"session": st.session_state.get("session_cookie")})
+    if response.status_code == 200:
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+        st.session_state.session_cookie = None
+        st.experimental_set_query_params(logged_in=None)
+        st.experimental_rerun()
+    else:
+        st.error("Logout failed")
 
 # Function to check login status from URL params
 def check_login_status():
@@ -166,8 +179,8 @@ if st.session_state.logged_in:
         st.write('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state.messages:
             if 'question' in message:
-                st.write(f'<div class="user-message"><b>User:</br> {message["question"]}</div>', unsafe_allow_html=True)
-                st.write(f'<div class="user-message"><b>Optimized:</br> {message["optimized_question"]}</div>', unsafe_allow_html=True)
+                st.write(f'<div class="user-message"><b>User:</b> {message["question"]}</div>', unsafe_allow_html=True)
+                # st.write(f'<div class="user-message"><b>Optimized:</b> {message["optimized_question"]}</div>', unsafe_allow_html=True)
             if 'answer' in message:
-                st.write(f'<div class="assistant-message"><b>AI:</br> {message["answer"]}</div>', unsafe_allow_html=True)
+                st.write(f'<div class="assistant-message"><b>AI:</b> {message["answer"]}</div>', unsafe_allow_html=True)
         st.write('</div>', unsafe_allow_html=True)
