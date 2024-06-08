@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import streamlit.components.v1 as components
 
 # Load custom CSS
 def load_css():
@@ -93,7 +94,7 @@ def check_login_status():
         st.session_state.logged_in = True
 
 # Streamlit app setup
-st.title('AI - talk to your documents')
+# st.markdown("<h1 style='text-align: center;'>AI - talk to your documents</h1>", unsafe_allow_html=True)
 
 # Initialize session state variables
 if 'logged_in' not in st.session_state:
@@ -149,7 +150,7 @@ if st.session_state.logged_in:
 
     if selected_chat:
         chat_id = selected_chat['id']
-        st.header(selected_chat['title'])
+        st.markdown(f'<div class="header"><h2>{selected_chat["title"]}</h2></div>', unsafe_allow_html=True)
 
         # Fetch and display available documents
         document_list = fetch_documents()
@@ -163,10 +164,16 @@ if st.session_state.logged_in:
             st.session_state.messages = fetch_messages(chat_id)
             st.session_state.active_chat = chat_id
 
-        # Input prompt for user question
-        prompt = st.text_input("Enter your question:")
+        # Display chat messages
+        for message in st.session_state.messages:
+            if 'question' in message:
+                st.write(f'<div class="chat-container"> <div class="user-message"><b>User:</b> {message["question"]}</div>', unsafe_allow_html=True)
+                # st.write(f'<div class="user-message"><b>Optimized:</b> {message["optimized_question"]}</div>', unsafe_allow_html=True)
+            if 'answer' in message:
+                st.write(f'<div class="assistant-message"><b>AI:</b> {message["answer"]}</div> </div>', unsafe_allow_html=True)
 
-        # Button to send the question
+        # Hidden Streamlit elements to interact with the HTML
+        prompt = st.text_input("", key="input_message")
         if st.button("Send"):
             if prompt and selected_document:
                 # Get response from the AI
@@ -174,13 +181,4 @@ if st.session_state.logged_in:
                 
                 # Display the user prompt and AI response
                 st.session_state.messages.append({'question': prompt, 'optimized_question': prompt, 'answer': response})
-
-        # Display chat messages
-        st.write('<div class="chat-container">', unsafe_allow_html=True)
-        for message in st.session_state.messages:
-            if 'question' in message:
-                st.write(f'<div class="user-message"><b>User:</b> {message["question"]}</div>', unsafe_allow_html=True)
-                # st.write(f'<div class="user-message"><b>Optimized:</b> {message["optimized_question"]}</div>', unsafe_allow_html=True)
-            if 'answer' in message:
-                st.write(f'<div class="assistant-message"><b>AI:</b> {message["answer"]}</div>', unsafe_allow_html=True)
-        st.write('</div>', unsafe_allow_html=True)
+                st.experimental_rerun()  # Rerun to display the new messages
